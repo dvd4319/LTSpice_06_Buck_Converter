@@ -1,0 +1,44 @@
+* C:\users\js\Documents\LTspice_FEDORA_2025\0.0.0_LTSpice_website_251209\LTSpice_06_Buck_Converter_251129\LTS_06_Buck_Converter_251129.asc
+V1 .dc 0 10
+V2 N003 0 PULSE(0 10 0 4.8u 0.2u 0 5u)
+R1 gate N002 10
+L1 source out 50µ Rser=0.05
+R2 out 0 1
+C1 out 0 10µ Rser=0.15
+V3 N001 0 15
+M1 .dc gate source source IRFZ48N
+D1 0 source MBR735
+V§Duty N004 0 5.4
+B§Edriver N002 source V={V(pwm)}
+XU1 in N003 N001 0 pwm MyComparator
+V4 in N004 SINE(0 2 50k)
+.model D D
+.lib C:\users\js\AppData\Local\LTspice\lib\cmp\standard.dio
+.model NMOS NMOS
+.model PMOS PMOS
+.lib C:\users\js\AppData\Local\LTspice\lib\cmp\standard.mos
+.tran 0 {t0+5/Freq} {t0} 0.1u
+* sawtooth
+* ESR=0.05
+* ESR=015
+* Open-Loop Frequency Response of a Buck Converter
+.param t0=1m
+.step dec param Freq 100 200k 10
+.save V(out) V(in)
+;.option numdgt=15 ;double precision for data
+;.option nomarch   ;do not plot marching waveform
+.measure Aavg avg V(out) ;average output voltage
+.measure Bavg avg V(in)  ;average input signal
+.measure Are  avg 2*(V(out)-Aavg)*cos(360*Freq*time) ;A real part
+.measure Aim  avg 2*(V(out)-Aavg)*sin(360*Freq*time) ;A imag part
+.measure Bre  avg 2*(V(in) -Bavg)*cos(360*Freq*time) ;B real part
+.measure Bim  avg 2*(V(in) -Bavg)*sin(360*Freq*time) ;B imag part
+.measure Amag param hypot(Are,Aim) ; A magnitude
+.measure Bmag param hypot(Bre,Bim) ; B magnitude
+.measure Aphi param atan2(Are,Aim) ; A phase
+.measure Bphi param atan2(Bre,Bim) ; B phase
+.measure GainMag param 20*log10(Amag/Bmag) ; Gain magnitude
+.measure GainPhi param Bphi-Aphi           ; Gain phase
+.lib MyComparator.sub
+.backanno
+.end
